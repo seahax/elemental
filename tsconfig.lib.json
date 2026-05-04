@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "${configDir}/src",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": ["vite/client"]
+  },
+  "include": ["${configDir}/src"],
+  "exclude": ["${configDir}/**/*.test.*", "${configDir}/**/test"]
+}

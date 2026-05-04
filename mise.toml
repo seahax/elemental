@@ -1,0 +1,14 @@
+[settings]
+experimental = true
+
+[tools]
+npm = "latest"
+node = "lts"
+
+[env]
+_.path = ["{{config_root}}/node_modules/.bin"]
+VITE_MODE = "development"
+
+[shell_alias]
+build = "npm run build"
+test = "npm test"
