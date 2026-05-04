@@ -25,6 +25,7 @@ import {
   useRoute,
   useLoading,
   useEffect,
+  useChildEffect,
   h,
 } from '@seahax/elemental';
 
@@ -77,6 +78,18 @@ export const MyComponent = defineComponent((shadow) => {
   ], (...dependencyValues) => {
     // Reactive code runs when the component is connected to the document,
     // and when any of the dependencies change.
+
+    return () => {
+      // Cleanup before the next effect callback and after the component
+      // is disconnected from the document.
+    };
+  });
+
+  // React to child list changes.
+  useChildEffect(() => {
+    // Reactive code runs when the component is connected to the document,
+    // and when the children of the component change. Access the current
+    // children using the `shadow.host.children` property.
 
     return () => {
       // Cleanup before the next effect callback and after the component

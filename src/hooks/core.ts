@@ -29,6 +29,27 @@ export function useEffect<const TDeps extends readonly ReadonlyRef<any>[]>(
   onDisconnect.push(cleanup);
 }
 
+/** React to child list changes (non-recursive). */
+export function useChildEffect(callback: () => (() => void) | void): void {
+  const { host } = getHookContext();
+  const ref = useRef(0);
+
+  const observer = new MutationObserver((mutation) => {
+    if (mutation.some((m) => m.type === 'childList')) {
+      ref.value = (ref.value + 1) % Number.MAX_SAFE_INTEGER;
+    }
+  });
+
+  useEffect([], () => {
+    observer.observe(host, { childList: true });
+    return () => observer.disconnect();
+  });
+
+  useEffect([ref], () => {
+    return callback();
+  });
+}
+
 /** Observe attribute changes. */
 export function useAttributes<TName extends string>(...names: TName[]): Readonly<Record<TName, Ref<string | null>>> {
   if (names.length === 0) return {} as any;

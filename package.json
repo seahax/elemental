@@ -1,6 +1,6 @@
 {
   "name": "@seahax/elemental",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Functional, reactive, web component base library.",
   "repository": {
     "type": "git",
