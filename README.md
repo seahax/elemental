@@ -50,7 +50,7 @@ export const MyComponent = defineComponent((shadow) => {
   });
   const globalStateRef = useStore(myStore, select, mutate);
   const [dataValueRef, ...] = useAttributes('data-value', ...);
-  const [routeMatchRef, routeStateRef] = useRoute('/path/', {
+  const routeMatchRef = useRoute('/path/', {
     match: 'prefix', // 'exact' | 'prefix' | RegExp
     source: 'pathname', // 'pathname' | 'hash'
   });
