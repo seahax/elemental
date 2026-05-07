@@ -14,8 +14,10 @@ Contains everything you need to build anything from a single component up to a f
 - No Dependencies
 - Tiny Bundle Size
 
-![NPM Version](https://img.shields.io/npm/v/@seahax/elemental?color=red)
-[![bundlejs](https://deno.bundlejs.com/badge?q=@seahax/elemental@latest&treeshake=[*])](https://bundlejs.com/?q=%40seahax%2Felemental%40latest&treeshake=%5B*%5D)
+[![NPM](https://img.shields.io/npm/v/%40seahax%2Felemental?style=for-the-badge&color=red)
+](https://www.npmjs.com/package/@seahax/elemental)
+[![BundleJS (GZIP)](https://img.shields.io/bundlejs/size/%40seahax/elemental?style=for-the-badge&label=bundlejs%20(gzip))
+](https://bundlejs.com/?q=%40seahax%2Felemental%40latest&treeshake=%5B*%5D)
 
 
 ## Define A Web Component
