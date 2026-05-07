@@ -1,8 +1,8 @@
-import type { ReadonlyRef, Ref } from '../component.ts';
 import type { Store } from '../store.ts';
-import { useEffect, useRef } from './core.ts';
+import { useEffect } from './effect.ts';
+import { type ReadonlyRef, type Ref, useRef } from './ref.ts';
 
-/** Observe store (external state) changes. */
+/** Use a reference (reactive state) bound to a (shared) store. */
 export function useStore<TState, TValue = TState>(
   store: Store<TState>,
   select: (state: TState) => TValue,

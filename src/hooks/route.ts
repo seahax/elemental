@@ -1,6 +1,6 @@
-import type { Ref } from '../component.ts';
 import { getRouter } from '../router.ts';
-import { useEffect, useRef } from './core.ts';
+import { useEffect } from './effect.ts';
+import { type Ref, useRef } from './ref.ts';
 import { useStore } from './store.ts';
 
 export interface RouteOptions {
@@ -10,7 +10,7 @@ export interface RouteOptions {
 
 export type RouteMatchArray = readonly [string, ...string[]] & { readonly groups: Record<string, string> };
 
-/** Observe route (window.history) changes. */
+/** Use a reference (reactive state) bound to route matching. */
 export function useRoute(
   path: string | readonly string[],
   { match = 'prefix', source = 'pathname' }: RouteOptions = {},

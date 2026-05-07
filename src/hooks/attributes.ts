@@ -1,25 +1,30 @@
-import type { Ref } from '../component.ts';
-import { useEffect, useHost, useRef } from './core.ts';
+import { useEffect } from './effect.ts';
+import { useHost } from './host.ts';
+import { type Ref, useRef } from './ref.ts';
 
-/** Observe attribute changes. */
-export function useAttributes<TName extends string>(...names: TName[]): Readonly<Record<TName, Ref<string | null>>> {
+/** Use references (reactive state) bound to attributes. */
+export function useAttributes<const TNames extends string[]>(
+  ...names: TNames
+): { -readonly [P in keyof TNames]: Ref<string | null> } {
   if (names.length === 0) return {} as any;
   const host = useHost();
+  const refs: Ref<string | null>[] = [];
+  const refMap = new Map<string, Ref<string | null>>();
 
-  const refs = Object.fromEntries(
-    names.map((name) => [
-      name,
-      useRef(host.getAttribute(name), (value) => {
-        if (value == null) host.removeAttribute(name);
-        else host.setAttribute(name, value);
-      }),
-    ]),
-  );
+  for (const name of names) {
+    const ref = useRef(host.getAttribute(name), (value) => {
+      if (value == null) host.removeAttribute(name);
+      else host.setAttribute(name, value);
+    });
+
+    refs.push(ref);
+    refMap.set(name, ref);
+  }
 
   const observer = new MutationObserver((mutation) => {
     for (const { attributeName } of mutation) {
       if (attributeName != null && Object.hasOwn(refs, attributeName)) {
-        refs[attributeName]!.value = host.getAttribute(attributeName);
+        refMap.get(attributeName)!.value = host.getAttribute(attributeName);
       }
     }
   });
@@ -29,5 +34,5 @@ export function useAttributes<TName extends string>(...names: TName[]): Readonly
     return () => observer.disconnect();
   });
 
-  return refs as Readonly<Record<TName, Ref<string | null>>>;
+  return refs as any;
 }

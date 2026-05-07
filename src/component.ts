@@ -1,5 +1,5 @@
-import { type Callbacks, createCallbacks } from './internal/callbacks.ts';
-import { $$ref, $$renderContextStack } from './internal/constants.ts';
+import { type Ref, useRef } from './hooks/ref.ts';
+import { createContextController } from './internal/context.ts';
 
 type SafeProps<TProps> = any extends any
   ? { [P in keyof TProps as P extends keyof HTMLElement ? never : P]: TProps[P] }
@@ -40,62 +40,31 @@ export type ComponentPropRefs<TProps extends object> = {
   readonly [P in keyof SafeProps<TProps>]: Ref<TProps[P] | undefined>;
 };
 
-export interface Ref<T> extends ReadonlyRef<T> {
-  value: T;
-}
-
-export interface ReadonlyRef<T> {
-  /** @hidden */
-  [$$ref]: unknown;
-  readonly value: T;
-}
-
-export type RefValues<T> = T extends readonly any[]
-  ? { [K in keyof T]: T[K] extends ReadonlyRef<infer V> ? V : never }
-  : never;
-
-declare global {
-  interface Window {
-    readonly [$$renderContextStack]: {
-      readonly host: HTMLElement;
-      readonly onDisconnect: Callbacks;
-      readonly onSetRef: Callbacks;
-      readonly useRef: <T>(initialValue: T, onChange?: (value: T) => void) => Ref<T>;
-    }[];
-  }
-}
-
-Object.assign(window, { [$$renderContextStack]: [] });
-
 /** Define a custom `HTMLElement` that is functional and reactive. */
 export function defineComponent<TProps extends object = {}>(
-  render: (shadow: ComponentShadowRoot<TProps>, props: ComponentPropRefs<TProps>) => void,
+  render: (shadowRoot: ComponentShadowRoot<TProps>, props: ComponentPropRefs<TProps>) => void,
   options?: ComponentOptions<TProps>,
 ): ComponentConstructor<TProps>;
 export function defineComponent(
   render: (
-    shadow: ComponentShadowRoot<Record<string, unknown>>,
+    shadowRoot: ComponentShadowRoot<Record<string, unknown>>,
     props: ComponentPropRefs<Record<string, unknown>>,
   ) => void,
-  options: ComponentOptions<Record<string, unknown>> = {},
-): new () => HTMLElement {
+  { props, shadow }: ComponentOptions<Record<string, unknown>> = {},
+): ComponentConstructor<{}> {
   return class extends HTMLElement {
-    readonly #onDisconnect = createCallbacks();
-    readonly #onSetRef = createCallbacks();
-    readonly #options = options;
-    readonly #refs: ComponentPropRefs<Record<string, unknown>>;
-    #notifying = false;
+    readonly #propRefs: ComponentPropRefs<Record<string, unknown>> = {};
+    readonly #contextController = createContextController(this);
 
     constructor() {
       super();
-      const refs: Record<string, Ref<unknown>> = (this.#refs = {});
 
-      if (this.#options.props) {
-        const descriptors = this.#options.props;
+      if (props) {
+        const propRefs: Record<string, Ref<unknown>> = this.#propRefs;
 
-        for (const [key, getDescriptor] of Object.entries(descriptors)) {
+        for (const [key, getDescriptor] of Object.entries(props)) {
           if (key in this) continue;
-          const ref = (refs[key] = this.#useRef<any>(undefined));
+          const ref = (propRefs[key] = useRef<any>(undefined));
           const descriptor = getDescriptor(ref, this);
           Object.defineProperty(this, key, descriptor);
         }
@@ -103,55 +72,14 @@ export function defineComponent(
     }
 
     protected connectedCallback(): void {
-      const shadow = this.attachShadow({ ...this.#options.shadow, mode: this.#options.shadow?.mode ?? 'open' });
-
-      try {
-        window[$$renderContextStack].push({
-          host: this,
-          onDisconnect: this.#onDisconnect,
-          onSetRef: this.#onSetRef,
-          useRef: this.#useRef,
-        });
-
-        render(shadow as ComponentShadowRoot<Record<string, unknown>>, this.#refs);
-      } finally {
-        window[$$renderContextStack].pop();
-      }
-
-      this.#onSetRef.run();
+      this.#contextController.connect(() => {
+        const shadowRoot = this.attachShadow({ ...shadow, mode: shadow?.mode ?? 'open' });
+        render(shadowRoot as ComponentShadowRoot<Record<string, unknown>>, this.#propRefs);
+      });
     }
 
     protected disconnectedCallback(): void {
-      this.#onSetRef.clear();
-      this.#onDisconnect.run({ clear: true });
+      this.#contextController.disconnect();
     }
-
-    readonly #useRef = <T>(initialValue: T, onChange?: (value: T) => void): Ref<T> => {
-      const notify = this.#notify;
-      let value = initialValue;
-
-      return {
-        [$$ref]: true,
-        get value() {
-          return value;
-        },
-        set value(newValue) {
-          if (newValue === value) return;
-          value = newValue;
-          onChange?.(value);
-          notify();
-        },
-      };
-    };
-
-    readonly #notify = (): void => {
-      if (this.#notifying) return;
-      this.#notifying = true;
-
-      queueMicrotask(() => {
-        this.#notifying = false;
-        this.#onSetRef.run();
-      });
-    };
   };
 }

@@ -51,10 +51,10 @@ export const MyComponent = defineComponent((shadow) => {
     // Handle
   });
 
-  // Use a reference (reactive state) bound to an observable (global) store.
+  // Use a reference (reactive state) bound to a (shared) store.
   const globalStateRef = useStore(myStore, select, mutate);
 
-  // Use references (reactive state) bound to attribute changes.
+  // Use references (reactive state) bound to attributes.
   const [dataValueRef, ...] = useAttributes('data-value', ...);
 
   // Use a reference (reactive state) bound to route matching.

@@ -1,34 +1,42 @@
-export interface Callbacks {
-  readonly push: (callback: () => void) => () => void;
-  readonly run: (options?: { readonly clear?: boolean }) => void;
+export interface Callbacks<TArgs extends unknown[] = []> {
+  readonly push: (callback: (...args: TArgs) => void) => () => void;
+  readonly run: (...args: TArgs) => void;
+  readonly runAndClear: (...args: TArgs) => void;
   readonly clear: () => void;
 }
 
-export function createCallbacks(): Callbacks {
-  const callbacks = new Set<() => void>();
+export function createCallbacks<TArgs extends unknown[] = []>(): Callbacks<TArgs> {
+  const callbacks = new Set<(...args: TArgs) => void>();
 
-  const self: Callbacks = {
+  const self: Callbacks<TArgs> = {
     push: (callback) => {
       callbacks.add(callback);
       return () => callbacks.delete(callback);
     },
-    run: ({ clear = false } = {}) => {
+    run: (...args) => {
       const errors: unknown[] = [];
       const callbacksCopy = [...callbacks];
 
       for (const callback of callbacksCopy) {
         try {
-          callback();
+          callback(...args);
         } catch (error: unknown) {
           errors.push(error);
         }
       }
 
-      if (clear) callbacks.clear();
       if (errors.length > 0) throw new AggregateError(errors);
-      return self;
     },
-    clear: () => callbacks.clear(),
+    runAndClear: (...args: TArgs) => {
+      try {
+        self.run(...args);
+      } finally {
+        self.clear();
+      }
+    },
+    clear: () => {
+      callbacks.clear();
+    },
   };
 
   return self;
