@@ -20,7 +20,7 @@
   ],
   "scripts": {
     "build": "vite build && tsc -b -f tsconfig.lib.json",
-    "prepare": "npm run build && npm test",
+    "prepublishOnly": "npm run build && npm test",
     "test": "eslint src"
   },
   "devDependencies": {

@@ -1,4 +1,6 @@
 export * from './component.ts';
+export * from './hooks/attributes.ts';
+export * from './hooks/child.ts';
 export * from './hooks/core.ts';
 export * from './hooks/loading.ts';
 export * from './hooks/route.ts';

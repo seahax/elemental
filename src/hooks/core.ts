@@ -2,6 +2,11 @@ import { type ReadonlyRef, type Ref, type RefValues } from '../component.ts';
 import { createCallbacks } from '../internal/callbacks.ts';
 import { $$renderContextStack } from '../internal/constants.ts';
 
+/** Get the component host element. */
+export function useHost(): HTMLElement {
+  return getHookContext().host;
+}
+
 /** Create an observable value. */
 export function useRef<T>(initialValue: T, onChange?: (value: T) => void): Ref<T> {
   return getHookContext().useRef(initialValue, onChange);
@@ -27,58 +32,6 @@ export function useEffect<const TDeps extends readonly ReadonlyRef<any>[]>(
   });
 
   onDisconnect.push(cleanup);
-}
-
-/** React to child list changes (non-recursive). */
-export function useChildEffect(callback: () => (() => void) | void): void {
-  const { host } = getHookContext();
-  const ref = useRef(0);
-
-  const observer = new MutationObserver((mutation) => {
-    if (mutation.some((m) => m.type === 'childList')) {
-      ref.value = (ref.value + 1) % Number.MAX_SAFE_INTEGER;
-    }
-  });
-
-  useEffect([], () => {
-    observer.observe(host, { childList: true });
-    return () => observer.disconnect();
-  });
-
-  useEffect([ref], () => {
-    return callback();
-  });
-}
-
-/** Observe attribute changes. */
-export function useAttributes<TName extends string>(...names: TName[]): Readonly<Record<TName, Ref<string | null>>> {
-  if (names.length === 0) return {} as any;
-  const { host } = getHookContext();
-
-  const refs = Object.fromEntries(
-    names.map((name) => [
-      name,
-      useRef(host.getAttribute(name), (value) => {
-        if (value == null) host.removeAttribute(name);
-        else host.setAttribute(name, value);
-      }),
-    ]),
-  );
-
-  const observer = new MutationObserver((mutation) => {
-    for (const { attributeName } of mutation) {
-      if (attributeName != null && Object.hasOwn(refs, attributeName)) {
-        refs[attributeName]!.value = host.getAttribute(attributeName);
-      }
-    }
-  });
-
-  useEffect([], () => {
-    observer.observe(host, { attributeFilter: names, attributes: true });
-    return () => observer.disconnect();
-  });
-
-  return refs as Readonly<Record<TName, Ref<string | null>>>;
 }
 
 function getHookContext(): (typeof window)[typeof $$renderContextStack][0] {

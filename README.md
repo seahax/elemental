@@ -26,6 +26,7 @@ import {
   useLoading,
   useEffect,
   useChildEffect,
+  useHost,
   h,
 } from '@seahax/elemental';
 
@@ -45,18 +46,24 @@ export const MyComponent = defineComponent((shadow) => {
     ]),
   ]);
 
-  // Use reference (reactive state) hooks.
+  // Use a reference (reactive state) value.
   const localStateRef = useRef('initial value', (newValue) => {
     // Handle
   });
+
+  // Use a reference (reactive state) bound to an observable (global) store.
   const globalStateRef = useStore(myStore, select, mutate);
+
+  // Use references (reactive state) bound to attribute changes.
   const [dataValueRef, ...] = useAttributes('data-value', ...);
+
+  // Use a reference (reactive state) bound to route matching.
   const routeMatchRef = useRoute('/path/', {
     match: 'prefix', // 'exact' | 'prefix' | RegExp
     source: 'pathname', // 'pathname' | 'hash'
   });
 
-  // Reactively load async data.
+  // Use a reference (reactive state) bound to an async loader function.
   const loadingStateRef = useLoading([
     // dependency references
   ], async (signal, ...dependencyValues) => {
@@ -96,6 +103,9 @@ export const MyComponent = defineComponent((shadow) => {
       // is disconnected from the document.
     };
   });
+
+  // Use the host element (generally only useful in reusable hooks).
+  const host = useHost();
 });
 ```
 
