@@ -2,9 +2,8 @@
 
 Functional, reactive, web component base library.
 
-Contains everything you need to build anything from a single component up to a full reactive application, with only about 3KB overhead (depending on compression, minification, and tree-shaking).
+Contains everything you need to build anything from a single component up to a full reactive application, with minimal overhead.
 
-- [![bundlejs](https://deno.bundlejs.com/badge?q=@seahax/elemental@latest&treeshake=[*])](https://bundlejs.com/?q=%40seahax%2Felemental%40latest&treeshake=%5B*%5D)
 - Create fully portable web components
 - Direct and safe access to the DOM (no virtual DOM)
 - React-style list rendering using unique keys
@@ -13,6 +12,11 @@ Contains everything you need to build anything from a single component up to a f
 - Client-side routing
 - No Build Tooling
 - No Dependencies
+- Tiny Bundle Size
+
+![NPM Version](https://img.shields.io/npm/v/@seahax/elemental?color=red)
+[![bundlejs](https://deno.bundlejs.com/badge?q=@seahax/elemental@latest&treeshake=[*])](https://bundlejs.com/?q=%40seahax%2Felemental%40latest&treeshake=%5B*%5D)
+
 
 ## Define A Web Component
 
