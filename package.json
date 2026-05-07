@@ -1,12 +1,12 @@
 {
   "name": "@seahax/elemental",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Functional, reactive, web component base library.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/seahax/elemental.git"
   },
-  "license": "Unlicense",
+  "license": "MIT-0",
   "type": "module",
   "exports": {
     ".": {
