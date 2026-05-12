@@ -14,9 +14,7 @@ Contains everything you need to build anything from a single component up to a f
 - No Dependencies
 - Tiny Bundle Size
 
-[![NPM](https://img.shields.io/npm/v/%40seahax%2Felemental?style=for-the-badge&color=red)
-](https://www.npmjs.com/package/@seahax/elemental)
-[![BundleJS (GZIP)](https://img.shields.io/bundlejs/size/%40seahax/elemental?style=for-the-badge&label=bundlejs%20(gzip))
+[![NPM](https://img.shields.io/npm/v/%40seahax%2Felemental?style=for-the-badge&color=red)](https://www.npmjs.com/package/@seahax/elemental) [![BundleJS (GZIP)](https://img.shields.io/bundlejs/size/%40seahax/elemental?style=for-the-badge&label=bundlejs%20(gzip))
 ](https://bundlejs.com/?q=%40seahax%2Felemental%40latest&treeshake=%5B*%5D)
 
 
@@ -32,13 +30,20 @@ import {
   useLoading,
   useEffect,
   useChildEffect,
+  useDisconnectEffect,
   useHost,
   h,
 } from '@seahax/elemental';
 
 export const MyComponent = defineComponent((shadow) => {
-  // This function is run once after the component is created, when it is
-  // first connected to the document.
+  // This function is called every time the component is connected to the
+  // document.
+  // 
+  // For the most part, a component's lifecycle should be handled as if it
+  // starts on connect and ends on disconnect, even though the component
+  // can be reconnected to the document. Restore internal state on
+  // connection from host attributes and properties. Effect hooks are
+  // designed to facilitate this pattern.
 
   // Create HTML elements and save references to them.
   const myInput = h('input');
@@ -93,8 +98,9 @@ export const MyComponent = defineComponent((shadow) => {
     // and when any of the dependencies change.
 
     return () => {
-      // Cleanup before the next effect callback and after the component
-      // is disconnected from the document.
+      // Cleanup after dependency refs are changed (before the next effect
+      // callback) and after the component is disconnected from the
+      // document.
     };
   });
 
@@ -108,6 +114,11 @@ export const MyComponent = defineComponent((shadow) => {
       // Cleanup before the next effect callback and after the component
       // is disconnected from the document.
     };
+  });
+
+  useDisconnectEffect(() => {
+    // Reactive code runs when the component is disconnected from the
+    // document.
   });
 
   // Use the host element (generally only useful in reusable hooks).

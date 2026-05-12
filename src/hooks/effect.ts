@@ -23,3 +23,12 @@ export function useEffect<const TDeps extends readonly ReadonlyRef<any>[]>(
 
   onDisconnect.push(cleanup);
 }
+
+/**
+ * React to document disconnection.
+ *
+ * Alias for: `useEffect([], () => callback)`
+ */
+export function useDisconnectEffect(callback: () => void): void {
+  useEffect([], () => callback);
+}
