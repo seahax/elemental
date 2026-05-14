@@ -1,23 +1,23 @@
 import { useEffect } from './effect.ts';
 import { type ReadonlyRef, type Ref, type RefValues, useRef } from './ref.ts';
 
-export interface LoadingValue<TValue> {
+export interface AsyncValue<TValue> {
   readonly value: TValue | undefined;
   readonly error: unknown;
   readonly isLoading: boolean;
 }
 
-export interface LoadingOptions {
+export interface AsyncOptions {
   readonly debounceMs?: number;
 }
 
 /** Use a reference (reactive state) bound to an async loader function. */
-export function useLoading<const TDeps extends readonly ReadonlyRef<any>[], TValue>(
+export function useAsync<const TDeps extends readonly ReadonlyRef<any>[], TValue>(
   deps: TDeps,
   callback: (signal: AbortSignal, ...values: RefValues<TDeps>) => Promise<TValue>,
-  { debounceMs }: LoadingOptions = {},
-): Ref<LoadingValue<TValue>> {
-  const ref = useRef<LoadingValue<TValue>>({ value: undefined, error: undefined, isLoading: true });
+  { debounceMs }: AsyncOptions = {},
+): Ref<AsyncValue<TValue>> {
+  const ref = useRef<AsyncValue<TValue>>({ value: undefined, error: undefined, isLoading: true });
   let skipDebounce = true;
 
   useEffect(deps, () => (...values) => {

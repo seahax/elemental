@@ -1,6 +1,6 @@
-import { useContext } from './context.ts';
+import { useController } from './controller.ts';
 
-/** Get the component host element. */
+/** Use the component host element. */
 export function useHost(): HTMLElement {
-  return useContext().host;
+  return useController().host;
 }

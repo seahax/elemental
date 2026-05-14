@@ -1,17 +1,22 @@
-import { type Ref, useRef } from './hooks/ref.ts';
-import { createContextController } from './internal/context.ts';
+import { type Ref } from './hooks/ref.ts';
+import { type Controller, createController } from './internal/controller.ts';
 
 type SafeProps<TProps> = any extends any
   ? { [P in keyof TProps as P extends keyof HTMLElement ? never : P]: TProps[P] }
   : never;
 
 export interface ComponentConstructor<TProps extends object> {
+  readonly formAssociated: boolean;
   new (): ComponentWithProps<TProps>;
 }
 
 export interface ComponentOptions<TProps extends object> {
+  /** Shadow root attachment options. */
   readonly shadow?: Partial<ShadowRootInit>;
+  /** Component custom property descriptors. */
   readonly props?: ComponentPropDescriptors<TProps>;
+  /** True to mark the component as form-associated. */
+  readonly formAssociated?: boolean;
 }
 
 export type ComponentPropDescriptors<TProps extends object> = {
@@ -50,36 +55,76 @@ export function defineComponent(
     shadowRoot: ComponentShadowRoot<Record<string, unknown>>,
     props: ComponentPropRefs<Record<string, unknown>>,
   ) => void,
-  { props, shadow }: ComponentOptions<Record<string, unknown>> = {},
+  { props, shadow, formAssociated = false }: ComponentOptions<Record<string, unknown>> = {},
 ): ComponentConstructor<{}> {
   return class extends HTMLElement {
-    readonly #propRefs: ComponentPropRefs<Record<string, unknown>> = {};
-    readonly #contextController = createContextController(this);
+    static readonly formAssociated = formAssociated;
+
+    readonly #shadow: ComponentShadowRoot<Record<string, unknown>>;
+    readonly #controller: Controller;
+    readonly #props: ComponentPropRefs<Record<string, unknown>> = {};
 
     constructor() {
       super();
 
+      this.#shadow = this.attachShadow({
+        ...shadow,
+        mode: shadow?.mode ?? 'open',
+      }) as ComponentShadowRoot<Record<string, unknown>>;
+
+      this.#controller = createController({
+        host: this,
+        formAssociated,
+        render: () => render(this.#shadow, this.#props),
+        attachInternals: () => super.attachInternals(),
+      });
+
       if (props) {
-        const propRefs: Record<string, Ref<unknown>> = this.#propRefs;
+        const propRefs: Record<string, Ref<unknown>> = this.#props;
 
         for (const [key, getDescriptor] of Object.entries(props)) {
           if (key in this) continue;
-          const ref = (propRefs[key] = useRef<any>(undefined));
+          const ref = (propRefs[key] = this.#controller.createRef<any>(undefined));
           const descriptor = getDescriptor(ref, this);
           Object.defineProperty(this, key, descriptor);
         }
       }
+
+      if (formAssociated) {
+        this.attachInternals();
+      }
+    }
+
+    override attachInternals(): ElementInternals {
+      return this.#controller.attachInternals();
     }
 
     protected connectedCallback(): void {
-      this.#contextController.connect(() => {
-        const shadowRoot = this.attachShadow({ ...shadow, mode: shadow?.mode ?? 'open' });
-        render(shadowRoot as ComponentShadowRoot<Record<string, unknown>>, this.#propRefs);
-      });
+      this.#controller.connectedCallback();
+    }
+
+    protected connectedMoveCallback(): void {
+      this.#controller.connectedMoveCallback();
     }
 
     protected disconnectedCallback(): void {
-      this.#contextController.disconnect();
+      this.#controller.disconnectedCallback();
+    }
+
+    protected adoptedCallback(): void {
+      this.#controller.adoptedCallback();
+    }
+
+    protected formDisabledCallback(disabled: boolean): void {
+      this.#controller.formDisabledCallback(disabled);
+    }
+
+    protected formResetCallback(): void {
+      this.#controller.formResetCallback();
+    }
+
+    protected formStateRestoreCallback(state: string | File | FormData, reason: 'restore' | 'autocomplete'): void {
+      this.#controller.formStateRestoreCallback(state, reason);
     }
   };
 }

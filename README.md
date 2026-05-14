@@ -23,16 +23,19 @@ Contains everything you need to build anything from a single component up to a f
 ```ts
 import {
   defineComponent,
+  h,
   useRef,
   useStore,
   useAttributes,
+  useParent,
+  useDocument,
   useRoute,
-  useLoading,
+  useAsync,
   useEffect,
   useChildEffect,
-  useDisconnectEffect,
+  useDisconnectCallback,
+  useElementInternals,
   useHost,
-  h,
 } from '@seahax/elemental';
 
 export const MyComponent = defineComponent((shadow) => {
@@ -65,8 +68,14 @@ export const MyComponent = defineComponent((shadow) => {
   // Use a reference (reactive state) bound to a (shared) store.
   const globalStateRef = useStore(myStore, select, mutate);
 
-  // Use references (reactive state) bound to attributes.
+  // Use references (reactive state) bound to the component's attributes.
   const [dataValueRef, ...] = useAttributes('data-value', ...);
+
+  // Use a reference (reactive state) bound to the component's parent node.
+  const parentNode = useParent();
+
+  // Use a reference (reactive state) bound to the component's owner document.
+  const ownerDocument = useDocument();
 
   // Use a reference (reactive state) bound to route matching.
   const routeMatchRef = useRoute('/path/', {
@@ -75,7 +84,7 @@ export const MyComponent = defineComponent((shadow) => {
   });
 
   // Use a reference (reactive state) bound to an async loader function.
-  const loadingStateRef = useLoading([
+  const asyncRef = useAsync([
     // dependency references
   ], async (signal, ...dependencyValues) => {
     // Reactive async code runs when the component is connected to the
@@ -91,8 +100,7 @@ export const MyComponent = defineComponent((shadow) => {
     globalStateRef,
     dataValueRef,
     routeMatchRef,
-    routeStateRef,
-    loadingStateRef,
+    asyncRef,
   ], (...dependencyValues) => {
     // Reactive code runs when the component is connected to the document,
     // and when any of the dependencies change.
@@ -116,14 +124,58 @@ export const MyComponent = defineComponent((shadow) => {
     };
   });
 
-  useDisconnectEffect(() => {
-    // Reactive code runs when the component is disconnected from the
-    // document.
+  // Register a document disconnection callback.
+  useDisconnectCallback(() => {
+    // Called when the component is disconnected from the document.
   });
 
-  // Use the host element (generally only useful in reusable hooks).
+  // Use the element's internals.
+  const elementInternals = useElementInternals();
+
+  // Use the component host element.
   const host = useHost();
 });
+```
+
+## Enable Form Association
+
+```ts
+import {
+  useElementInternals,
+  useForm,
+  useFormDisabled,
+  useFormResetCallback,
+  useFormRestoreCallback,
+} from '@seahax/elemental';
+
+const MyComponent = defineComponent(
+  (shadow) => {
+    // Use the element's internals.
+    const elementInternals = useElementInternals();
+
+    // Use a reference (reactive state) bound to the associated form.
+    const formRef = useForm();
+
+    // Use a reference (reactive state) bound to the form disabled state.
+    const formDisabledRef = useFormDisabled();
+
+    // Register a form reset callback.
+    useFormResetCallback(() => {
+      // Called when the associated form is reset. Only called on connect
+      // if the form was reset while the component was disconnected.
+    });
+
+    // Register a form restore callback.
+    useFormRestoreCallback((state, reason) => {
+      // Called when the associated form is restored. Only called on connect
+      // if the form was restored while the component was disconnected.
+    });
+  },
+  {
+    // Enable form association.
+    formAssociated: true,
+  }
+);
 ```
 
 ## Customize The Shadow Root
@@ -131,14 +183,15 @@ export const MyComponent = defineComponent((shadow) => {
 ```ts
 const MyComponent = defineComponent(
   (shadow) => {
-    // Renderer...
+    ...
   },
   {
-    // Shadow root options.
+    // Use custom shadow root initialization options.
+    // (default: { mode: 'open' }).
     shadow: {
       mode: 'closed',
       ...
-    }
+    },
   }
 );
 ```

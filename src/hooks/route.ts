@@ -8,17 +8,17 @@ export interface RouteOptions {
   readonly source?: 'pathname' | 'hash';
 }
 
-export type RouteMatchArray = readonly [string, ...string[]] & { readonly groups: Record<string, string> };
+export type RouteMatch = readonly [string, ...string[]] & { readonly groups: Record<string, string> };
 
 /** Use a reference (reactive state) bound to route matching. */
 export function useRoute(
   path: string | readonly string[],
   { match = 'prefix', source = 'pathname' }: RouteOptions = {},
-): Ref<RouteMatchArray | null> {
+): Ref<RouteMatch | null> {
   const matchRx = match === 'exact' ? /^$/u : match === 'prefix' ? /^.*$/u : match;
   const paths = Array.isArray(path) ? (path as readonly string[]) : [path as string];
   const refRoute = useStore(getRouter(), (state) => state[source]);
-  const refMatch = useRef<RouteMatchArray | null>(getMatch(refRoute.value));
+  const refMatch = useRef<RouteMatch | null>(getMatch(refRoute.value));
 
   useEffect([refRoute], (route) => {
     refMatch.value = getMatch(route);
@@ -26,10 +26,10 @@ export function useRoute(
 
   return refMatch;
 
-  function getMatch(route: string): RouteMatchArray | null {
+  function getMatch(route: string): RouteMatch | null {
     const prefix = paths.find((path) => route.endsWith(path)) ?? null;
     if (prefix == null) return null;
     route = route.slice(prefix.length);
-    return route.match(matchRx) as RouteMatchArray | null;
+    return route.match(matchRx) as RouteMatch | null;
   }
 }
