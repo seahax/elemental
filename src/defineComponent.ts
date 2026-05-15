@@ -1,9 +1,16 @@
 import { type Ref } from './hooks/useRef.ts';
 import { type Controller, createController } from './internal/createController.ts';
 
-type SafeProps<TProps> = any extends any
-  ? { [P in keyof TProps as P extends keyof HTMLElement ? never : P]: TProps[P] }
-  : never;
+type UnsafeProps =
+  | 'connectedCallback'
+  | 'connectedMoveCallback'
+  | 'disconnectedCallback'
+  | 'adoptedCallback'
+  | 'formResetCallback'
+  | 'formStateRestoreCallback'
+  | 'formDisabledCallback';
+
+type SafePropKeys<TProps> = Exclude<keyof TProps, keyof HTMLElement | UnsafeProps>;
 
 export interface ComponentConstructor<TProps extends object> {
   readonly formAssociated: boolean;
@@ -20,7 +27,7 @@ export interface ComponentOptions<TProps extends object> {
 }
 
 export type ComponentPropDescriptors<TProps extends object> = {
-  readonly [P in keyof SafeProps<TProps>]: ComponentPropDescriptorFactory<TProps[P]>;
+  readonly [P in SafePropKeys<TProps>]: ComponentPropDescriptorFactory<TProps[P]>;
 };
 
 export type ComponentPropDescriptorFactory<TType> = (
@@ -34,7 +41,7 @@ export interface ComponentPropDescriptor<T> extends Omit<PropertyDescriptor, 'va
 }
 
 export type ComponentWithProps<TProps extends object> = HTMLElement & {
-  -readonly [P in keyof SafeProps<TProps>]: TProps[P];
+  -readonly [P in SafePropKeys<TProps>]: TProps[P];
 };
 
 export type ComponentShadowRoot<TProps extends object> = Omit<ShadowRoot, 'host'> & {
@@ -42,7 +49,7 @@ export type ComponentShadowRoot<TProps extends object> = Omit<ShadowRoot, 'host'
 };
 
 export type ComponentPropRefs<TProps extends object> = {
-  readonly [P in keyof SafeProps<TProps>]: Ref<TProps[P] | undefined>;
+  readonly [P in SafePropKeys<TProps>]: Ref<TProps[P] | undefined>;
 };
 
 /** Define a custom `HTMLElement` that is functional and reactive. */

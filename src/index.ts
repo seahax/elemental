@@ -2,7 +2,7 @@ export * from './createStore.ts';
 export * from './defineComponent.ts';
 export * from './hooks/useAsync.ts';
 export * from './hooks/useAttributes.ts';
-export * from './hooks/useChild.ts';
+export * from './hooks/useChildEffect.ts';
 export * from './hooks/useDisconnect.ts';
 export * from './hooks/useDocument.ts';
 export * from './hooks/useEffect.ts';

@@ -6,6 +6,7 @@ import { type Callbacks, createCallbacks } from './createCallbacks.ts';
 export interface Controller {
   readonly host: HTMLElement;
   readonly onNotify: Callbacks;
+  readonly onAfterRender: Callbacks;
   readonly onDisconnect: Callbacks;
   readonly refDocument: ReadonlyRef<Document>;
   readonly refParent: ReadonlyRef<ParentNode | null>;
@@ -73,6 +74,7 @@ export function createController({ host, formAssociated, render, attachInternals
   const controller = {
     host,
     onNotify,
+    onAfterRender: createCallbacks(),
     onDisconnect: createCallbacks(),
     refDocument: createRef(host.ownerDocument),
     refParent: createRef(host.parentNode),
@@ -89,6 +91,7 @@ export function createController({ host, formAssociated, render, attachInternals
       return (internals ??= attachInternals());
     },
     connectedCallback: () => {
+      if (connected) return;
       connected = true;
       controller.refParent.value = host.parentNode;
 
@@ -99,6 +102,8 @@ export function createController({ host, formAssociated, render, attachInternals
         controllers.pop();
       }
 
+      controller.onAfterRender.runAndClear();
+
       if (deferredFormUpdate?.type === 'reset') {
         controller.formAssociated?.onReset.run();
       } else if (deferredFormUpdate?.type === 'restore') {
@@ -108,10 +113,12 @@ export function createController({ host, formAssociated, render, attachInternals
       controller.onNotify.run();
     },
     connectedMoveCallback: () => {
+      if (!connected) return;
       controller.refParent.value = host.parentNode;
       controller.onNotify.run();
     },
     disconnectedCallback: () => {
+      if (!connected) return;
       controller.onNotify.clear();
       controller.formAssociated?.onReset.clear();
       controller.formAssociated?.onRestore.clear();
