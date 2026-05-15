@@ -1,6 +1,6 @@
-import { useEffect } from './effect.ts';
-import { useHost } from './host.ts';
-import { type Ref, useRef } from './ref.ts';
+import { useEffect } from './useEffect.ts';
+import { useHost } from './useHost.ts';
+import { type Ref, useRef } from './useRef.ts';
 
 /** Use references (reactive state) bound to attributes. */
 export function useAttributes<const TNames extends string[]>(

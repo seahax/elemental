@@ -1,5 +1,5 @@
-import { type Ref } from './hooks/ref.ts';
-import { type Controller, createController } from './internal/controller.ts';
+import { type Ref } from './hooks/useRef.ts';
+import { type Controller, createController } from './internal/createController.ts';
 
 type SafeProps<TProps> = any extends any
   ? { [P in keyof TProps as P extends keyof HTMLElement ? never : P]: TProps[P] }

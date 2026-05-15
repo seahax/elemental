@@ -1,6 +1,6 @@
-import type { Store } from '../store.ts';
-import { useEffect } from './effect.ts';
-import { type ReadonlyRef, type Ref, useRef } from './ref.ts';
+import type { Store } from '../createStore.ts';
+import { useEffect } from './useEffect.ts';
+import { type ReadonlyRef, type Ref, useRef } from './useRef.ts';
 
 /** Use a reference (reactive state) bound to a (shared) store. */
 export function useStore<TState, TValue = TState>(

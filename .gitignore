@@ -1,5 +1,6 @@
 .vscode
 .local
+.vitest*
 node_modules
 dist
 out

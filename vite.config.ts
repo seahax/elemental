@@ -1,5 +1,6 @@
-import { defineConfig } from 'vite';
+import { playwright } from '@vitest/browser-playwright';
 import { analyzer, unstableRolldownAdapter } from 'vite-bundle-analyzer';
+import { defineConfig } from 'vitest/config';
 
 process.chdir(import.meta.dirname);
 
@@ -26,6 +27,18 @@ export default defineConfig({
       output: {
         preserveModules: true,
       },
+    },
+  },
+  test: {
+    browser: {
+      enabled: true,
+      headless: true,
+      provider: playwright({
+        launchOptions: {
+          channel: 'chromium',
+        },
+      }),
+      instances: [{ browser: 'chromium' }],
     },
   },
 });

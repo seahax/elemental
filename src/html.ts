@@ -24,8 +24,8 @@ type ElementProps<TElement> = {
 };
 
 type ElementAttrs<TElement> = TElement extends string | CustomElementConstructor | Element
-  ? {}
-  : Readonly<Record<`${Alpha}${string}`, AttrValue>>;
+  ? Readonly<Record<`${Alpha}${string}`, AttrValue>>
+  : {};
 
 export type HtmlConfig<TElement> = ElementAttrs<TElement> & ElementProps<ElementType<TElement>>;
 export type HtmlConfigWithKey<TElement> = { readonly [DATA_KEY]: string } & HtmlConfig<TElement>;

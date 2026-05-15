@@ -1,6 +1,6 @@
-import type { Controller } from '../internal/controller.ts';
-import { useController } from './controller.ts';
-import type { ReadonlyRef } from './ref.ts';
+import type { Controller } from '../internal/createController.ts';
+import { useInternalController } from './useInternalController.ts';
+import type { ReadonlyRef } from './useRef.ts';
 
 /** Use a reference (reactive state) bound to the associated form. */
 export function useForm(): ReadonlyRef<HTMLFormElement | null> {
@@ -25,7 +25,7 @@ export function useFormRestoreCallback(
 }
 
 function useFormAssociated(): Controller['formAssociated'] & {} {
-  const { formAssociated } = useController();
+  const { formAssociated } = useInternalController();
   if (!formAssociated) throw new Error('form hooks must be called in a form-associated component');
   return formAssociated;
 }

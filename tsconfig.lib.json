@@ -6,5 +6,5 @@
     "types": ["vite/client"]
   },
   "include": ["${configDir}/src"],
-  "exclude": ["${configDir}/**/*.test.*", "${configDir}/**/test"]
+  "exclude": ["${configDir}/**/test", "${configDir}/**/*.test.*"]
 }

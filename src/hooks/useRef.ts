@@ -1,5 +1,5 @@
-import type { $$ref } from '../internal/controller.ts';
-import { useController } from './controller.ts';
+import type { $$ref } from '../internal/constants.ts';
+import { useInternalController } from './useInternalController.ts';
 
 export interface Ref<T> extends ReadonlyRef<T> {
   value: T;
@@ -17,5 +17,5 @@ export type RefValues<T> = T extends readonly any[]
 
 /** Use a reference (reactive state) value. */
 export function useRef<T>(initialValue: T, onChange?: (value: T) => void): Ref<T> {
-  return useController().createRef(initialValue, onChange);
+  return useInternalController().createRef(initialValue, onChange);
 }

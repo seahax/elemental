@@ -1,7 +1,7 @@
-import { getRouter } from '../router.ts';
-import { useEffect } from './effect.ts';
-import { type Ref, useRef } from './ref.ts';
-import { useStore } from './store.ts';
+import { getRouter } from '../getRouter.ts';
+import { useEffect } from './useEffect.ts';
+import { type Ref, useRef } from './useRef.ts';
+import { useStore } from './useStore.ts';
 
 export interface RouteOptions {
   readonly match?: 'prefix' | 'exact' | RegExp;

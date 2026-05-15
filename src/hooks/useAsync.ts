@@ -1,5 +1,5 @@
-import { useEffect } from './effect.ts';
-import { type ReadonlyRef, type Ref, type RefValues, useRef } from './ref.ts';
+import { useEffect } from './useEffect.ts';
+import { type ReadonlyRef, type Ref, type RefValues, useRef } from './useRef.ts';
 
 export interface AsyncValue<TValue> {
   readonly value: TValue | undefined;

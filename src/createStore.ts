@@ -1,4 +1,4 @@
-import { createCallbacks } from './internal/callbacks.ts';
+import { createCallbacks } from './internal/createCallbacks.ts';
 
 export interface Store<TState> {
   state: TState;

@@ -1,5 +1,7 @@
-import { type ReadonlyRef, type Ref } from '../hooks/ref.ts';
-import { type Callbacks, createCallbacks } from './callbacks.ts';
+import { type ReadonlyRef, type Ref } from '../hooks/useRef.ts';
+import { $$ref } from './constants.ts';
+import { controllers } from './controllers.ts';
+import { type Callbacks, createCallbacks } from './createCallbacks.ts';
 
 export interface Controller {
   readonly host: HTMLElement;
@@ -26,19 +28,11 @@ export interface Controller {
   readonly formStateRestoreCallback: (state: string | File | FormData, reason: 'restore' | 'autocomplete') => void;
 }
 
-export interface ControllerConfig {
+interface ControllerConfig {
   readonly host: HTMLElement;
   readonly formAssociated: boolean;
   readonly render: (controller: Controller) => void;
   readonly attachInternals: () => ElementInternals;
-}
-
-export const $$ref = Symbol();
-
-const controllers: Controller[] = [];
-
-export function getController(): Controller | undefined {
-  return controllers.at(-1);
 }
 
 export function createController({ host, formAssociated, render, attachInternals }: ControllerConfig): Controller {

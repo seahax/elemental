@@ -1,6 +1,6 @@
-import { useEffect } from './effect.ts';
-import { useHost } from './host.ts';
-import { useRef } from './ref.ts';
+import { useEffect } from './useEffect.ts';
+import { useHost } from './useHost.ts';
+import { useRef } from './useRef.ts';
 
 /** React to child list changes (non-recursive). */
 export function useChildEffect(callback: () => (() => void) | void): void {

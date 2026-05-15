@@ -1,9 +1,11 @@
-import { createStore, type Store } from './store.ts';
+import { createStore, type Store } from './createStore.ts';
 
-export interface RouterState {
+interface RouterState {
   readonly pathname: string;
   readonly hash: string;
 }
+
+let singleton: Store<RouterState> | undefined;
 
 /**
  * Get a router {@link Store} that is updated when the client side route (aka:
@@ -11,12 +13,8 @@ export interface RouterState {
  * called (ie. a singleton).
  */
 export function getRouter(): Store<RouterState> {
-  return (singleton ??= createRouter());
-}
+  if (singleton) return singleton;
 
-let singleton: Store<RouterState> | undefined;
-
-function createRouter(): Store<RouterState> {
   const store = createStore<RouterState>({
     pathname: window.location.pathname,
     hash: window.location.hash,
@@ -56,6 +54,6 @@ function createRouter(): Store<RouterState> {
   );
 
   window.addEventListener('popstate', onUpdate);
-
-  return store;
+  singleton = store;
+  return singleton;
 }
